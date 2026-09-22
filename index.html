@@ -37,36 +37,60 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
             user-select: none;
+            position: relative;
         }
 
-        /* Estilo para las frases flotantes al hacer clic */
+        /* Estilo para las frases flotantes automáticas con profundidad 3D */
         .frase-flotante {
             position: fixed;
             color: #ffc300;
             font-family: 'Georgia', serif;
-            font-size: 1.1rem;
             font-weight: bold;
             pointer-events: none;
-            z-index: 9999;
-            text-shadow: 0 0 8px rgba(255, 195, 0, 0.8), 0 0 15px rgba(255, 0, 84, 0.6);
-            animation: flotarYDesaparecer 1.5s ease-out forwards;
             white-space: nowrap;
+            animation: flotarMovimiento linear forwards;
+            will-change: transform, opacity;
         }
 
-        @keyframes flotarYDesaparecer {
+        /* Capas de profundidad (Efecto 3D / Cerca - Lejos) */
+        .capa-fondo {
+            z-index: 1;
+            font-size: 0.8rem;
+            opacity: 0.3;
+            filter: blur(2px);
+            text-shadow: 0 0 5px rgba(255, 195, 0, 0.3);
+        }
+
+        .capa-media {
+            z-index: 10;
+            font-size: 1.1rem;
+            opacity: 0.7;
+            text-shadow: 0 0 10px rgba(255, 195, 0, 0.6), 0 0 15px rgba(255, 0, 84, 0.4);
+        }
+
+        .capa-frente {
+            z-index: 80;
+            font-size: 1.5rem;
+            opacity: 0.95;
+            text-shadow: 0 0 15px rgba(255, 195, 0, 0.9), 0 0 25px rgba(255, 0, 84, 0.8);
+        }
+
+        @keyframes flotarMovimiento {
             0% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(0.8) translateY(0);
+                opacity: 0;
+                transform: translate(-50%, 20px) scale(0.8);
             }
-            50% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.1) translateY(-25px);
+            20% {
+                opacity: var(--opacidad-max, 0.8);
+            }
+            80% {
+                opacity: var(--opacidad-max, 0.8);
             }
             100% {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(1) translateY(-50px);
+                transform: translate(-50%, -80px) scale(1.1);
             }
         }
 
@@ -78,6 +102,7 @@
             border: 1px solid rgba(255, 195, 0, 0.3);
             animation: fadeIn 1.5s ease;
             z-index: 100;
+            position: relative;
         }
 
         .girasol-container { width: 120px; height: 120px; margin: 0 auto 15px auto; }
@@ -86,8 +111,27 @@
 
         input { padding: 12px; border-radius: 8px; border: 1px solid var(--girasol-petalo); margin-bottom: 20px; width: 220px; text-align: center; background: rgba(0,0,0,0.6); color: white; }
 
-        #contenido { display: none; width: 100%; max-width: 600px; padding: 20px; animation: fadeIn 2s ease; }
-        .rosa-frame { position: relative; width: 320px; height: 430px; margin: 0 auto 10px auto; }
+        #contenido { display: none; width: 100%; max-width: 800px; padding: 10px; animation: fadeIn 2s ease; position: relative; z-index: 50; }
+        
+        /* Layout principal con la rosa al centro y botones flotantes a los lados */
+        .seccion-rosa {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin: 10px 0;
+            gap: 15px;
+        }
+
+        .columna-botones {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            justify-content: center;
+            z-index: 60;
+        }
+
+        .rosa-frame { position: relative; width: 280px; height: 380px; margin: 0; }
         .rosa-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 20px rgba(255, 0, 84, 0.5)); }
 
         #grupo-petalos { transform-origin: 50% 55%; }
@@ -106,10 +150,25 @@
         @keyframes dibujarTallo { to { stroke-dashoffset: 0; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        #texto { font-size: 1.15rem; line-height: 1.6; color: #ffe5ec; margin-top: 10px; padding: 0 20px; white-space: pre-line; }
+        #texto { font-size: 1.15rem; line-height: 1.6; color: #ffe5ec; margin-top: 5px; padding: 0 20px; white-space: pre-line; }
 
         .btn-entrar { background: linear-gradient(45deg, #ff9500, #ffc300); color: #000; border: none; padding: 12px 35px; border-radius: 25px; cursor: pointer; font-weight: bold; }
-        .btn-accion { background: var(--rosa-brillante); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; margin: 10px; transition: 0.3s; }
+        
+        .btn-accion { 
+            background: var(--rosa-brillante); 
+            color: white; 
+            border: none; 
+            padding: 10px 18px; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 0.9rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            white-space: nowrap;
+        }
+        .btn-accion:hover {
+            transform: scale(1.05);
+        }
         
         .btn-detalle { background: linear-gradient(45deg, #ffc300, #ff9500); color: #000; box-shadow: 0 0 15px rgba(255, 195, 0, 0.5); }
         .btn-video { background: linear-gradient(45deg, #ff0054, #ff758f); box-shadow: 0 0 15px rgba(255, 0, 84, 0.5); }
@@ -192,6 +251,23 @@
             transition: 0.1s ease-out;
             z-index: 3;
         }
+
+        /* Responsive para pantallas pequeñas */
+        @media (max-width: 600px) {
+            .seccion-rosa {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .columna-botones {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .rosa-frame {
+                width: 220px;
+                height: 300px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -216,42 +292,54 @@
 
     <div id="contenido">
         <h1 style="color: var(--rosa-brillante); margin-bottom: 0;">💖 Wendy 💖</h1>
-        <div class="rosa-frame">
-            <svg viewBox="0 0 100 150" class="rosa-svg">
-                <defs>
-                    <radialGradient id="gradRosa" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" style="stop-color:#ff4d6d" /><stop offset="100%" style="stop-color:#800e13" />
-                    </radialGradient>
-                </defs>
-                <path id="tallo" class="tallo-largo" d="M50,145 Q55,100 50,55" />
-                <path class="animar-petalo" d="M50,115 Q75,105 65,125 Q50,130 50,115" fill="#2d6a4f" style="animation-delay: 1.2s;" />
-                <path class="animar-petalo" d="M50,95 Q25,85 35,105 Q50,115 50,95" fill="#2d6a4f" style="animation-delay: 1.5s;" />
-                <g id="grupo-petalos">
-                    <ellipse class="petalo-rosa animar-petalo" cx="50" cy="36" rx="14" ry="20" style="animation-delay: 2s;" />
-                    <ellipse class="petalo-rosa animar-petalo" cx="50" cy="74" rx="14" ry="20" style="animation-delay: 2.2s;" />
-                    <ellipse class="petalo-rosa animar-petalo" cx="30" cy="55" rx="20" ry="14" style="animation-delay: 2.4s;" />
-                    <ellipse class="petalo-rosa animar-petalo" cx="70" cy="55" rx="20" ry="14" style="animation-delay: 2.6s;" />
-                    <g transform="rotate(45 50 55)">
-                        <ellipse class="petalo-rosa animar-petalo" cx="50" cy="35" rx="12" ry="18" style="animation-delay: 2.8s;" />
-                        <ellipse class="petalo-rosa animar-petalo" cx="50" cy="75" rx="12" ry="18" style="animation-delay: 3s;" />
+        
+        <div class="seccion-rosa">
+            <!-- Botones lado Izquierdo -->
+            <div id="botones-izq" class="columna-botones" style="display:none;">
+                <button class="btn-accion btn-video" onclick="abrirVideo()">Ver video 🎬</button>
+                <button class="btn-accion" onclick="abrirModal('carta')">Leer mi carta ✉️</button>
+            </div>
+
+            <!-- Rosa central -->
+            <div class="rosa-frame">
+                <svg viewBox="0 0 100 150" class="rosa-svg">
+                    <defs>
+                        <radialGradient id="gradRosa" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" style="stop-color:#ff4d6d" /><stop offset="100%" style="stop-color:#800e13" />
+                        </radialGradient>
+                    </defs>
+                    <path id="tallo" class="tallo-largo" d="M50,145 Q55,100 50,55" />
+                    <path class="animar-petalo" d="M50,115 Q75,105 65,125 Q50,130 50,115" fill="#2d6a4f" style="animation-delay: 1.2s;" />
+                    <path class="animar-petalo" d="M50,95 Q25,85 35,105 Q50,115 50,95" fill="#2d6a4f" style="animation-delay: 1.5s;" />
+                    <g id="grupo-petalos">
+                        <ellipse class="petalo-rosa animar-petalo" cx="50" cy="36" rx="14" ry="20" style="animation-delay: 2s;" />
+                        <ellipse class="petalo-rosa animar-petalo" cx="50" cy="74" rx="14" ry="20" style="animation-delay: 2.2s;" />
+                        <ellipse class="petalo-rosa animar-petalo" cx="30" cy="55" rx="20" ry="14" style="animation-delay: 2.4s;" />
+                        <ellipse class="petalo-rosa animar-petalo" cx="70" cy="55" rx="20" ry="14" style="animation-delay: 2.6s;" />
+                        <g transform="rotate(45 50 55)">
+                            <ellipse class="petalo-rosa animar-petalo" cx="50" cy="35" rx="12" ry="18" style="animation-delay: 2.8s;" />
+                            <ellipse class="petalo-rosa animar-petalo" cx="50" cy="75" rx="12" ry="18" style="animation-delay: 3s;" />
+                        </g>
+                        <g transform="rotate(-45 50 55)">
+                            <ellipse class="petalo-rosa animar-petalo" cx="50" cy="35" rx="12" ry="18" style="animation-delay: 3.2s;" />
+                            <ellipse class="petalo-rosa animar-petalo" cx="50" cy="75" rx="12" ry="18" style="animation-delay: 3.4s;" />
+                        </g>
+                        <circle class="petalo-rosa animar-petalo" cx="50" cy="55" r="10" style="animation-delay: 3.8s; fill: #4a0404;" />
                     </g>
-                    <g transform="rotate(-45 50 55)">
-                        <ellipse class="petalo-rosa animar-petalo" cx="50" cy="35" rx="12" ry="18" style="animation-delay: 3.2s;" />
-                        <ellipse class="petalo-rosa animar-petalo" cx="50" cy="75" rx="12" ry="18" style="animation-delay: 3.4s;" />
-                    </g>
-                    <circle class="petalo-rosa animar-petalo" cx="50" cy="55" r="10" style="animation-delay: 3.8s; fill: #4a0404;" />
-                </g>
-            </svg>
+                </svg>
+            </div>
+
+            <!-- Botones lado Derecho -->
+            <div id="botones-der" class="columna-botones" style="display:none;">
+                <button class="btn-accion btn-detalle" onclick="abrirDetalleEspecial()">Abrir detalle ✨</button>
+                <button class="btn-accion btn-detalle" onclick="redirigirAMensajeEspecial()">Abre este detalle más ✨</button>
+            </div>
         </div>
+
         <p id="texto"></p>
         
-        <!-- Menú de Botones Principales -->
-        <div id="botones-finales" style="display:none;">
-            <button class="btn-accion btn-video" onclick="abrirVideo()">Ver video 🎬</button>
-            <button class="btn-accion" onclick="abrirModal('carta')">Leer mi carta ✉️</button>
-            <button class="btn-accion btn-detalle" onclick="abrirDetalleEspecial()">Abrir detalle ✨</button>
-            <!-- Botón que redirige al otro archivo HTML -->
-            <button class="btn-accion btn-detalle" onclick="redirigirAMensajeEspecial()">Abre este detalle más ✨</button>
+        <!-- Botones inferiores justo debajo de la rosa -->
+        <div id="botones-abajo" style="display:none; margin-top: 5px;">
             <button class="btn-accion btn-perdon" onclick="abrirModal('perdon')">Por favor ábrelo 🥺</button>
             <button class="btn-accion btn-pregunta" onclick="abrirModal('pregunta-modal')">Una pregunta 💬</button>
         </div>
@@ -279,7 +367,6 @@
         <h3 style="text-align: center; color: #ffc300; font-family: 'Georgia', serif; border-bottom: 1px solid rgba(255,195,0,0.3); padding-bottom: 10px;">Un detalle especial... ✨</h3>
         <div id="detalle-contenido" style="font-family: 'Georgia', serif; line-height: 1.8; text-align: center; font-size: 1.1rem; min-height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
         </div>
-        <!-- Botón con ID y oculto por defecto -->
         <button id="btn-cerrar-detalle" class="btn-accion" style="background: #ffc300; color: #000; width: 100%; margin-top: 20px; font-weight: bold; display: none;" onclick="cerrarModal('detalle')">Cerrar</button>
     </div>
 
@@ -317,7 +404,7 @@
     </div>
 
 <script>
-    // 100 Frases variadas relacionadas con universo, estrella, inspiración, brillo, canción, vida, flor, etc.
+    // Lista de frases románticas
     const frasesRápidas = [
         "Eres mi universo ✨", "Mi estrella fugaz 💫", "Mi inspiración 💖", "Tu brillo me ilumina 🌟",
         "Eres mi canción favorita 🎶", "El amor de mi vida 🌹", "Mi flor más hermosa 🌸", "Un destello mágico ⭐",
@@ -346,16 +433,37 @@
         "Mi todo y mucho más 💖", "Siempre tú, mi reina 👑", "Mi destello de amor ✨", "Wendy de mi corazón ❤️"
     ];
 
-    document.addEventListener('click', function(e) {
-        if(e.target.tagName === 'INPUT') return;
-
-        let x = e.clientX;
-        let y = e.clientY;
-
+    // Función para crear una frase flotante en pantalla
+    function crearFraseFlotante(posX = null, posY = null) {
         let frase = document.createElement('div');
         frase.className = 'frase-flotante';
+
+        let randProfundidad = Math.random();
+        let duracion = 0;
+        let opacidadMax = 0.8;
+
+        if (randProfundidad < 0.4) {
+            frase.classList.add('capa-fondo');
+            duracion = 4.5 + Math.random() * 2;
+            opacidadMax = 0.35;
+        } else if (randProfundidad < 0.8) {
+            frase.classList.add('capa-media');
+            duracion = 3.5 + Math.random() * 1.5;
+            opacidadMax = 0.75;
+        } else {
+            frase.classList.add('capa-frente');
+            duracion = 2.5 + Math.random() * 1;
+            opacidadMax = 0.95;
+        }
+
+        frase.style.setProperty('--opacidad-max', opacidadMax);
+
+        let x = posX !== null ? posX : Math.random() * (window.innerWidth - 100) + 50;
+        let y = posY !== null ? posY : Math.random() * (window.innerHeight - 100) + 50;
+
         frase.style.left = x + 'px';
         frase.style.top = y + 'px';
+        frase.style.animationDuration = duracion + 's';
 
         let fraseAleatoria = frasesRápidas[Math.floor(Math.random() * frasesRápidas.length)];
         frase.innerText = fraseAleatoria;
@@ -364,7 +472,16 @@
 
         setTimeout(() => {
             frase.remove();
-        }, 1500);
+        }, duracion * 1000);
+    }
+
+    setInterval(() => {
+        crearFraseFlotante();
+    }, 450);
+
+    document.addEventListener('click', function(e) {
+        if(e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+        crearFraseFlotante(e.clientX, e.clientY);
     });
 
     function verificar() {
@@ -384,12 +501,15 @@
         let i = 0; let elemento = document.getElementById("texto");
         function escribir() {
             if (i < texto.length) { elemento.innerHTML += texto.charAt(i); i++; setTimeout(escribir, 55); }
-            else { document.getElementById("botones-finales").style.display = "block"; }
+            else { 
+                document.getElementById("botones-izq").style.display = "flex";
+                document.getElementById("botones-der").style.display = "flex";
+                document.getElementById("botones-abajo").style.display = "block";
+            }
         }
         escribir();
     }
 
-    // Función para abrir la otra página HTML
     function redirigirAMensajeEspecial() {
         window.location.href = "Un Mensaje Especial Para Ti.html";
     }
@@ -413,9 +533,7 @@
     }
 
     function abrirDetalleEspecial() {
-        // Aseguramos que el botón cerrar esté oculto al iniciar
         document.getElementById('btn-cerrar-detalle').style.display = 'none';
-
         abrirModal('detalle');
         let contenedor = document.getElementById('detalle-contenido');
         contenedor.innerHTML = "";
@@ -485,8 +603,6 @@
         setTimeout(() => {
             contenedor.innerHTML = `<img src="poema.png" alt="Poema para Wendy" class="img-poema">`;
             contenedor.style.opacity = "1";
-
-            // Se muestra el botón 'Cerrar' únicamente al terminar de cargar la imagen del poema
             document.getElementById('btn-cerrar-detalle').style.display = 'block';
         }, 400);
     }
