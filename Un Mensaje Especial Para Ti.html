@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Wendy ❤️</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *, ::before, ::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(135deg, #ffecec, #fff5f5, #ffebeb);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+    }
+
+    #hearts-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .heart {
+      position: absolute;
+      opacity: 0;
+      animation: floatUp 6s linear forwards;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) scale(0.5); opacity: 0.9; }
+      80%  { opacity: 0.4; }
+      100% { transform: translateY(-110vh) scale(1.2); opacity: 0; }
+    }
+
+    .scene {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: #c0392b;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* SOBRE */
+    .envelope {
+      position: relative;
+      width: 300px;
+      height: 190px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    @media (min-width: 500px) {
+      .envelope { width: 420px; height: 265px; }
+    }
+    .envelope:hover { transform: scale(1.03); }
+    .envelope:active { transform: scale(0.97); }
+
+    .env-body {
+      position: absolute;
+      inset: 0;
+      background: #d14d44;
+      border-radius: 6px;
+    }
+    .env-body::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      background-image: conic-gradient(
+        transparent 60deg,
+        #c24e46 60deg 120deg,
+        #e15349 120deg 240deg,
+        #c24e46 240deg 300deg,
+        transparent 300deg
+      );
+    }
+    .env-flap {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 50%;
+      background: #d14d44;
+      clip-path: polygon(0% 0%, 50% 72%, 100% 0%);
+      z-index: 2;
+      transition: transform 0.5s ease;
+      transform-origin: top center;
+    }
+    .envelope.open .env-flap {
+      transform: rotateX(180deg);
+    }
+    .env-address {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      gap: 0.25rem;
+      pointer-events: none;
+    }
+    .env-address p { font-size: 0.85rem; }
+    @media (min-width: 500px) { .env-address p { font-size: 1.05rem; } }
+    .env-address .lbl { font-weight: 400; opacity: 0.85; }
+    .env-address .nm  { font-weight: 700; }
+    .env-stamp {
+      position: absolute;
+      top: 10px; right: 10px;
+      width: 38px; height: 48px;
+      background: #fff;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      z-index: 4;
+      box-shadow: 0 0 0 3px #d14d44, 0 0 0 5px #fff;
+    }
+
+    /* OVERLAY */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      animation: fadeIn 0.3s ease;
+    }
+    .overlay.active { display: flex; }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* CARTA POPUP */
+    .carta {
+      background: #fff;
+      border-radius: 18px;
+      max-width: 580px;
+      width: 92%;
+      padding: 2.8rem 2.5rem 2.2rem;
+      text-align: center;
+      position: relative;
+      animation: popIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.4) translateY(60px); opacity: 0; }
+      to   { transform: scale(1)   translateY(0);    opacity: 1; }
+    }
+    .carta::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 8px;
+      background: linear-gradient(90deg, #e84393, #e05050, #e84393);
+      border-radius: 18px 18px 0 0;
+    }
+    .close-btn {
+      position: absolute;
+      top: 16px; right: 20px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #c0392b;
+      line-height: 1;
+    }
+    .close-btn:hover { color: #e05050; transform: scale(1.2); }
+
+    .hearts-top {
+      font-size: 1.3rem;
+      letter-spacing: 8px;
+      color: #e05050;
+      margin: 0.2rem 0 1.2rem;
+    }
+    .remitente {
+      background: #fff0f0;
+      border: 1.5px dashed #e05050;
+      border-radius: 10px;
+      padding: 0.8rem 1.8rem;
+      display: inline-block;
+      margin-bottom: 1.2rem;
+      font-size: 0.95rem;
+      color: #c0392b;
+      line-height: 1.8;
+    }
+    .remitente strong { color: #a93226; }
+    hr {
+      border: none;
+      border-top: 1px dashed #f9b8b8;
+      margin: 1.2rem 0;
+    }
+    .foto {
+      width: 95px; height: 95px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #f9b8b8;
+      display: block;
+      margin: 0 auto 1.2rem;
+    }
+    .foto.wide {
+      width: 180px; height: 110px;
+      border-radius: 12px;
+      margin-top: 1.2rem;
+    }
+    .poema {
+      color: #c0392b;
+      font-size: 1.05rem;
+      line-height: 1.9;
+      font-weight: 600;
+      padding: 0 0.5rem;
+    }
+    .grito {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2rem;
+      color: #e05050;
+      display: block;
+      margin-top: 0.8rem;
+    }
+    .hearts-bot {
+      font-size: 1.2rem;
+      letter-spacing: 6px;
+      color: #e05050;
+      margin-top: 1.2rem;
+    }
+    .firma {
+      font-size: 0.85rem;
+      color: #bbb;
+      margin-top: 0.5rem;
+    }
+
+    /* ESTILO DEL BOTÓN DE VOLVER AL MENÚ */
+    .btn-volver-container {
+      margin-top: 1.8rem;
+    }
+    .btn-volver {
+      display: inline-block;
+      padding: 10px 22px;
+      background: linear-gradient(135deg, #e05050, #c0392b);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      border-radius: 25px;
+      box-shadow: 0 4px 12px rgba(224, 80, 80, 0.3);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .btn-volver:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(224, 80, 80, 0.45);
+      background: linear-gradient(135deg, #e84393, #e05050);
+    }
+  </style>
+</head>
+<body>
+
+<div id="hearts-container"></div>
+
+<audio id="audio-love"
+  src="https://github.com/codeninja543/codeninja5433/raw/refs/heads/main/Reik%20-%20Creo%20En%20Ti%20(LetraLyrics).mp3"
+  loop hidden></audio>
+
+<div class="scene">
+  <p class="hint">♥ Toca el sobre para abrirlo ♥</p>
+
+  <div class="envelope" id="envelope" onclick="abrirSobre()">
+    <div class="env-body">
+      <div class="env-flap"></div>
+      <div class="env-address">
+        <div class="env-stamp">❤️</div>
+        <p><span class="lbl">Para: </span><span class="nm">La persona mas maravillosa</span></p>
+        <p><span class="lbl">De: </span><span class="nm">Tu fan #1</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Carta en el centro -->
+<div class="overlay" id="overlay" onclick="cerrarSiAfuera(event)">
+  <div class="carta" id="carta">
+    <button class="close-btn" onclick="cerrarCarta()">✕</button>
+
+    <div class="hearts-top">♥ ♥ ♥</div>
+
+    <div class="remitente">
+      <p><strong>Para:</strong> Mi Wendy</p>
+      <p><strong>De:</strong> Tu admirador</p>
+    </div>
+
+    <hr>
+
+    <img class="foto"
+      src="https://img.freepik.com/vector-premium/pulgar-dedos-imprimir-marca-huella-dactilar-amor-corazon_53500-1839.jpg"
+      alt="amor"
+      onerror="this.style.display='none'">
+
+    <p class="poema">
+      El peor vacío es el que dejas cuando te vas,<br>
+      pero el verdadero misterio es que sigues aquí,<br>
+      metida en mis silencios, guiando mis pulsos.<br><br>
+      Me acostumbré a tu recuerdo como se acostombra el alma a su norte,<br>
+      sabiendo que tu ausencia pesa, pero deseando guardarte.<br><br>
+      Aún te pienso en la quietud de la madrugada,<br>
+      con una fijeza constante que me llena y me hunde.<br><br>
+      Eres el pensamiento que no puedo arrancar de mis días,<br>
+      el eco de una historia que me niego a borrar,<br>
+      porque prefiero recordarte a tener que aceptar el olvido.
+      <span class="grito">Te amo mucho 💕</span>
+    </p>
+
+    <img class="foto wide"
+      src="https://img.freepik.com/fotos-premium/imagen-flores-amarillas-palabras-sol-citadas-ella_1191871-60686.jpg"
+      alt="flores"
+      onerror="this.style.display='none'">
+
+    <div class="hearts-bot">♥ ♥ ♥ ♥ ♥</div>
+    <p class="firma">— Con todo el amor del mundo —</p>
+
+    <!-- BOTÓN DE VOLVER AL MENÚ -->
+    <div class="btn-volver-container">
+      <a href="#" onclick="irAlMenu(event)" class="btn-volver">← Volver al Menú Principal</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function abrirSobre() {
+    document.getElementById('envelope').classList.add('open');
+    setTimeout(() => {
+      document.getElementById('overlay').classList.add('active');
+    }, 450);
+    const audio = document.getElementById('audio-love');
+    if (audio.paused) audio.play().catch(() => {});
+  }
+
+  function cerrarCarta() {
+    document.getElementById('overlay').classList.remove('active');
+    setTimeout(() => {
+      document.getElementById('envelope').classList.remove('open');
+    }, 200);
+  }
+
+  function cerrarSiAfuera(e) {
+    if (e.target === document.getElementById('overlay')) cerrarCarta();
+  }
+
+  /* FUNCIÓN PARA IR AL MENÚ GUARDANDO LA SESIÓN */
+  function irAlMenu(e) {
+    e.preventDefault();
+    localStorage.setItem('sesionIniciada', 'true');
+    window.location.href = 'index.html'; // Si tu archivo del menú se llama distinto, ponlo aquí
+  }
+
+  const emojis = ['❤️','🩷','💕','💗','💓','💖'];
+  function crearCorazon() {
+    const c = document.getElementById('hearts-container');
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    h.style.left = Math.random() * 100 + 'vw';
+    h.style.top = '105vh';
+    h.style.fontSize = (14 + Math.random() * 16) + 'px';
+    h.style.animationDuration = (5 + Math.random() * 4) + 's';
+    c.appendChild(h);
+    setTimeout(() => h.remove(), 9500);
+  }
+  setInterval(crearCorazon, 700);
+  for (let i = 0; i < 10; i++) setTimeout(crearCorazon, i * 300);
+</script>
+</body>
+</html>
