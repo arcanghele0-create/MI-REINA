@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Wendy 💖</title>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7WS4LH8YCY"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-7WS4LH8YCY');
+    </script>
+
+    <!-- Librería para el efecto de confeti de corazones -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --rosa-brillante: #ff0054;
+            --rosa-profundo: #590222;
+            --verde-tallo: #1b4332;
+            --girasol-petalo: #ffc300;
+            --girasol-centro: #3d2b1f;
+            --color-carta: #fdf5e6;
+        }
+
+        body {
+            background: #050505;
+            color: white;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            position: relative;
+        }
+
+        /* Estilo para las frases flotantes automáticas con profundidad 3D */
+        .frase-flotante {
+            position: fixed;
+            color: #ffc300;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            pointer-events: none;
+            white-space: nowrap;
+            animation: flotarMovimiento linear forwards;
+            will-change: transform, opacity;
+        }
+
+        /* Capas de profundidad (Efecto 3D / Cerca - Lejos) */
+        .capa-fondo {
+            z-index: 1;
+            font-size: 0.8rem;
+            opacity: 0.3;
+            filter: blur(2px);
+            text-shadow: 0 0 5px rgba(255, 195, 0, 0.3);
+        }
+
+        .capa-media {
+            z-index: 10;
+            font-size: 1.1rem;
+            opacity: 0.7;
+            text-shadow: 0 0 10px rgba(255, 195, 0, 0.6), 0 0 15px rgba(255, 0, 84, 0.4);
+        }
+
+        .capa-frente {
+            z-index: 80;
+            font-size: 1.5rem;
+            opacity: 0.95;
+            text-shadow: 0 0 15px rgba(255, 195, 0, 0.9), 0 0 25px rgba(255, 0, 84, 0.8);
+        }
+
+        @keyframes flotarMovimiento {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, 20px) scale(0.8);
+            }
+            20% {
+                opacity: var(--opacidad-max, 0.8);
+            }
+            80% {
+                opacity: var(--opacidad-max, 0.8);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -80px) scale(1.1);
+            }
+        }
+
+        #login {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px 50px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 195, 0, 0.3);
+            animation: fadeIn 1.5s ease;
+            z-index: 100;
+            position: relative;
+        }
+
+        .girasol-container { width: 120px; height: 120px; margin: 0 auto 15px auto; }
+        .girasol-svg { width: 100%; height: 100%; animation: girar 12s linear infinite; }
+        @keyframes girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        input { padding: 12px; border-radius: 8px; border: 1px solid var(--girasol-petalo); margin-bottom: 20px; width: 220px; text-align: center; background: rgba(0,0,0,0.6); color: white; }
+
+        #contenido { display: none; width: 100%; max-width: 800px; padding: 10px; animation: fadeIn 2s ease; position: relative; z-index: 50; }
+        
+        /* Layout principal con la rosa al centro y botones flotantes a los lados */
+        .seccion-rosa {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin: 10px 0;
+            gap: 15px;
+        }
+
+        .columna-botones {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            justify-content: center;
+            z-index: 60;
+        }
+
+        .rosa-frame { position: relative; width: 280px; height: 380px; margin: 0; }
+        .rosa-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 20px rgba(255, 0, 84, 0.5)); }
+
+        #grupo-petalos { transform-origin: 50% 55%; }
+        .animar-latido { animation: latido 1.5s ease-in-out infinite; }
+        @keyframes latido { 
+            0%, 100% { transform: scale(1); } 
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 30px var(--rosa-brillante)); } 
+        }
+
+        .petalo-rosa { fill: url(#gradRosa); opacity: 0; transform-origin: center; }
+        .tallo-largo { fill: none; stroke: var(--verde-tallo); stroke-width: 4; stroke-dasharray: 250; stroke-dashoffset: 250; }
+        .animar-petalo { animation: aparecer 2s ease-out forwards; }
+        .animar-tallo { animation: dibujarTallo 2.5s ease-out forwards; }
+
+        @keyframes aparecer { 0% { opacity: 0; transform: scale(0); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes dibujarTallo { to { stroke-dashoffset: 0; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        #texto { font-size: 1.15rem; line-height: 1.6; color: #ffe5ec; margin-top: 5px; padding: 0 20px; white-space: pre-line; }
+
+        .btn-entrar { background: linear-gradient(45deg, #ff9500, #ffc300); color: #000; border: none; padding: 12px 35px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        
+        .btn-accion { 
+            background: var(--rosa-brillante); 
+            color: white; 
+            border: none; 
+            padding: 10px 18px; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 0.9rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            white-space: nowrap;
+        }
+        .btn-accion:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn-detalle { background: linear-gradient(45deg, #ffc300, #ff9500); color: #000; box-shadow: 0 0 15px rgba(255, 195, 0, 0.5); }
+        .btn-video { background: linear-gradient(45deg, #ff0054, #ff758f); box-shadow: 0 0 15px rgba(255, 0, 84, 0.5); }
+        .btn-perdon { background: linear-gradient(45deg, #7209b7, #3a0ca3); box-shadow: 0 0 15px rgba(114, 9, 183, 0.5); }
+        .btn-pregunta { background: linear-gradient(45deg, #00b4d8, #0077b6); box-shadow: 0 0 15px rgba(0, 180, 216, 0.5); }
+
+        .modal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            width: 85%; max-width: 420px; background: var(--color-carta); color: #3d2b1f; padding: 30px;
+            border-radius: 15px; box-shadow: 0 0 50px rgba(0,0,0,0.9); z-index: 200; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        #detalle {
+            background: #000;
+            border: 2px solid var(--girasol-petalo);
+            color: #ffc300;
+            box-shadow: 0 0 35px rgba(255, 195, 0, 0.4);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .abierto { transform: translate(-50%, -50%) scale(1) !important; display: block !important; }
+        #video-modal { background: #000; padding: 10px; max-width: 500px; }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 150; }
+
+        .img-poema {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 195, 0, 0.5);
+            box-shadow: 0 0 25px rgba(255, 195, 0, 0.6);
+            animation: efectoMagico 1.2s ease-out forwards;
+        }
+
+        @keyframes efectoMagico {
+            0% {
+                opacity: 0;
+                transform: scale(0.7) rotate(-3deg);
+                filter: brightness(2) blur(10px);
+            }
+            50% {
+                filter: brightness(1.5) blur(2px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+                filter: brightness(1) blur(0px);
+            }
+        }
+
+        .opciones-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 35px;
+            position: relative;
+            height: 90px;
+        }
+        #btn-si {
+            background: #2a9d8f;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            z-index: 2;
+        }
+        #btn-no {
+            background: #e76f51;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            position: absolute;
+            right: 15px;
+            transition: 0.1s ease-out;
+            z-index: 3;
+        }
+
+        /* Responsive para pantallas pequeñas */
+        @media (max-width: 600px) {
+            .seccion-rosa {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .columna-botones {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .rosa-frame {
+                width: 220px;
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="musica" loop src="musica.mp3"></audio>
+    <div id="overlay"></div>
+
+    <div id="login">
+        <div class="girasol-container">
+            <svg viewBox="0 0 100 100" class="girasol-svg">
+                <g fill="var(--girasol-petalo)">
+                    <ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(0 50 50)" /><ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(30 50 50)" /><ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(60 50 50)" /><ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(90 50 50)" /><ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(120 50 50)" /><ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(150 50 50)" /><ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(180 50 50)" /><ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(210 50 50)" /><ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(240 50 50)" /><ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(270 50 50)" /><ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(300 50 50)" /><ellipse cx="50" cy="20" rx="6" ry="15" transform="rotate(330 50 50)" />
+                </g>
+                <circle cx="50" cy="50" r="18" fill="#5c4033" /><circle cx="50" cy="50" r="14" fill="var(--girasol-centro)" />
+            </svg>
+        </div>
+        <h2 style="margin-top: 0; color: var(--girasol-petalo);">Acceso Privado</h2>
+        <input type="password" id="pass" placeholder="Ingresa la clave">
+        <br>
+        <button class="btn-entrar" onclick="verificar()">Entrar 💌</button>
+    </div>
+
+    <div id="contenido">
+        <h1 style="color: var(--rosa-brillante); margin-bottom: 0;">💖 Wendy 💖</h1>
+        
+        <div class="seccion-rosa">
+            <!-- Botones lado Izquierdo -->
+            <div id="botones-izq" class="columna-botones" style="display:none;">
+                <button class="btn-accion btn-video" onclick="abrirVideo()">Ver video 🎬</button>
+                <button class="btn-accion" onclick="abrirModal('carta')">Leer mi carta ✉️</button>
+            </div>
+
+            <!-- Rosa central -->
+            <div class="rosa-frame">
+                <svg viewBox="0 0 100 150" class="rosa-svg">
+                    <defs>
+                        <radialGradient id="gradRosa" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" style="stop-color:#ff4d6d" /><stop offset="100%" style="stop-color:#800e13" />
+                        </radialGradient>
+                    </defs>
+                    <path id="tallo" class="tallo-largo" d="M50,145 Q55,100 50,55" />
+                    <path class="animar-petalo" d="M50,115 Q75,105 65,125 Q50,130 50,115" fill="#2d6a4f" style="animation-delay: 1.2s;" />
+                    <path class="animar-petalo" d="M50,95 Q25,85 35,105 Q50,115 50,95" fill="#2d6a4f" style="animation-delay: 1.5s;" />
+                    <g id="grupo-petalos">
+                        <ellipse class="petalo-rosa animar-petalo" cx="50" cy="36" rx="14" ry="20" style="animation-delay: 2s;" />
+                        <ellipse class="petalo-rosa animar-petalo" cx="50" cy="74" rx="14" ry="20" style="animation-delay: 2.2s;" />
+                        <ellipse class="petalo-rosa animar-petalo" cx="30" cy="55" rx="20" ry="14" style="animation-delay: 2.4s;" />
+                        <ellipse class="petalo-rosa animar-petalo" cx="70" cy="55" rx="20" ry="14" style="animation-delay: 2.6s;" />
+                        <g transform="rotate(45 50 55)">
+                            <ellipse class="petalo-rosa animar-petalo" cx="50" cy="35" rx="12" ry="18" style="animation-delay: 2.8s;" />
+                            <ellipse class="petalo-rosa animar-petalo" cx="50" cy="75" rx="12" ry="18" style="animation-delay: 3s;" />
+                        </g>
+                        <g transform="rotate(-45 50 55)">
+                            <ellipse class="petalo-rosa animar-petalo" cx="50" cy="35" rx="12" ry="18" style="animation-delay: 3.2s;" />
+                            <ellipse class="petalo-rosa animar-petalo" cx="50" cy="75" rx="12" ry="18" style="animation-delay: 3.4s;" />
+                        </g>
+                        <circle class="petalo-rosa animar-petalo" cx="50" cy="55" r="10" style="animation-delay: 3.8s; fill: #4a0404;" />
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Botones lado Derecho -->
+            <div id="botones-der" class="columna-botones" style="display:none;">
+                <button class="btn-accion btn-detalle" onclick="abrirDetalleEspecial()">Abrir detalle ✨</button>
+                <button class="btn-accion btn-detalle" onclick="redirigirAMensajeEspecial()">Abre este detalle más ✨</button>
+            </div>
+        </div>
+
+        <p id="texto"></p>
+        
+        <!-- Botones inferiores justo debajo de la rosa -->
+        <div id="botones-abajo" style="display:none; margin-top: 5px;">
+            <button class="btn-accion btn-perdon" onclick="abrirModal('perdon')">Por favor ábrelo 🥺</button>
+            <button class="btn-accion btn-pregunta" onclick="abrirModal('pregunta-modal')">Una pregunta 💬</button>
+        </div>
+    </div>
+
+    <!-- Modal de la Carta Principal -->
+    <div id="carta" class="modal">
+        <h3 style="text-align: center; color: #800e13; font-family: 'Georgia', serif;">Para: Wendy ✨</h3>
+        <div id="pag1" style="font-family: 'Georgia', serif; line-height: 1.6; text-align: justify;">
+            <p>Desde que te conocí, hay algo en ti que no puedo dejar de admirar. Me gusta mucho cómo eres, me gusta tu forma de ver las cosas y, sobre todo, me gusta cómo me haces sentir cuando hablamos. 💭💕</p>
+            <p><b>Desde que empezamos a charlar y a conocernos cada vez más y más, no dejo de pensar en ti, en tu sonrisa, en tu voz y en la conexión que tenemos.</b> Cada vez que pienso en ti, me pongo a sonreír de la nada, ¡ya me pasó en clases jiji! 🤭✨</p>
+            <button class="btn-accion" style="width: 100%; margin-top: 10px;" onclick="siguientePagina()">Siguiente página ✨</button>
+        </div>
+        <div id="pag2" style="display: none; font-family: 'Georgia', serif; line-height: 1.6; text-align: justify;">
+            <p>Eres alguien increíble y maravillosa, y perdón si me cuesta trabajo creer que una chica tan única como tú se haya fijado en mí. Pero saber que te vas enamorando poco a poco de mí le da calidez a mi corazón. 🥺❤️</p>
+            <p>No soy el mejor poeta ni el mejor escritor, pero todo lo que lees aquí me sale del corazón. Te admiro por la gran mamá que eres, te esfuerzas muchísimo por ti y por la pequeña Victoria, es algo que siempre voy a admirar. 👩‍👧🌷</p>
+            <p>Me gustas mucho y espero que te haya gustado mucho esta pequeña sorpresa, mi reina. 🥰👑</p>
+            <p style="text-align: right; font-weight: bold;">Con todo mi cariño, <br> Yo ✨</p>
+            <button class="btn-accion" onclick="cerrarModal('carta')">Cerrar Carta</button>
+        </div>
+    </div>
+
+    <!-- Modal de "Abrir detalle" -->
+    <div id="detalle" class="modal">
+        <h3 style="text-align: center; color: #ffc300; font-family: 'Georgia', serif; border-bottom: 1px solid rgba(255,195,0,0.3); padding-bottom: 10px;">Un detalle especial... ✨</h3>
+        <div id="detalle-contenido" style="font-family: 'Georgia', serif; line-height: 1.8; text-align: center; font-size: 1.1rem; min-height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        </div>
+        <button id="btn-cerrar-detalle" class="btn-accion" style="background: #ffc300; color: #000; width: 100%; margin-top: 20px; font-weight: bold; display: none;" onclick="cerrarModal('detalle')">Cerrar</button>
+    </div>
+
+    <!-- Modal de la Carta de Perdón -->
+    <div id="perdon" class="modal">
+        <h3 style="text-align: center; color: #7209b7; font-family: 'Georgia', serif;">De todo corazón... 💔</h3>
+        <div style="font-family: 'Georgia', serif; line-height: 1.6; text-align: justify; max-height: 350px; overflow-y: auto; padding-right: 5px;">
+            <p>Perdón por haberte ocultado 1 vez, perdón por ser tan idiota contigo, perdón por ser un estúpido, un bobo, un tarado y un imbécil.</p>
+            <p>Pero quiero que sepas que no tengo malas intenciones contigo, al contrario, lo único que quiero es amarte a ti y a la pequeña Dannita; no quiero a nadie que no seas tú, no quiero ni deseo a nadie que no seas tú.</p>
+            <p>Me enamoré de ti tan profundamente que ya no veo un futuro en el que no estés a mi lado. Entraste en mi corazón y de ahí no podría sacarte aunque quiera intentarlo.</p>
+            <p>Te pido y te suplico perdón. Jamás te fui infiel, jamás me fijaría en alguien más porque mis ojos solo te ven a ti. Jamás dejaría de amarte, porque con tan simples cosas tocaste hasta lo más profundo de mi alma y sé que nadie jamás lo hará de esa manera.</p>
+            <p>Te amo mi Wendy, mi amor, mi reina, mi todo. Por favor te suplico perdón. 🥺❤️</p>
+        </div>
+        <button class="btn-accion" style="background: #7209b7; width: 100%; margin-top: 15px;" onclick="cerrarModal('perdon')">Cerrar</button>
+    </div>
+
+    <!-- Modal de la Pregunta "¿Podemos arreglarlo?" -->
+    <div id="pregunta-modal" class="modal">
+        <h3 id="titulo-pregunta" style="text-align: center; color: #0077b6; font-family: 'Georgia', serif; font-size: 1.4rem;">¿Podemos arreglarlo?</h3>
+        <div id="respuesta-contenido" style="text-align: center;">
+            <div class="opciones-container">
+                <button id="btn-si" onclick="responderSi()">Sí 💖</button>
+                <button id="btn-no" onmouseover="moverBoton()" ontouchstart="moverBoton()" onclick="moverBoton()">No 🙈</button>
+            </div>
+        </div>
+        <br>
+        <button class="btn-accion" style="background: #555; width: 100%; margin-top: 15px;" onclick="cerrarModal('pregunta-modal')">Volver</button>
+    </div>
+
+    <!-- Modal del Video -->
+    <div id="video-modal" class="modal">
+        <video id="player" width="100%" controls> <source src="video.mp4" type="video/mp4"> </video>
+        <br>
+        <button class="btn-accion" style="background: #800e13;" onclick="cerrarVideo()">← Atrás / Volver</button>
+    </div>
+
+<script>
+    // Lista de frases románticas
+    const frasesRápidas = [
+        "Eres mi universo ✨", "Mi estrella fugaz 💫", "Mi inspiración 💖", "Tu brillo me ilumina 🌟",
+        "Eres mi canción favorita 🎶", "El amor de mi vida 🌹", "Mi flor más hermosa 🌸", "Un destello mágico ⭐",
+        "Mi melodía perfecta 🎵", "Eres mi sol ☀️", "Mi luna brillante 🌙", "Mi pensamiento bonito 💭",
+        "Mi refugio seguro 🏰", "Tu sonrisa es arte 🎨", "Mi razón de sonreír 😁", "Mi constelación favorita 🌌",
+        "Eres luz pura ✨", "Mi paz en el caos 🕊️", "Mi poema favorito 📜", "Mi persona especial 💕",
+        "Te amo, Wendy ❤️", "Mi reina adorada 👑", "Un sueño hecho realidad 💭", "Mi destino bonito 🗺️",
+        "Mi latido constante 💓", "Eres magia pura ✨", "Mi mundo entero 🌍", "Mi lugar feliz 🏡",
+        "Eres mi poesía 📖", "Mi alegría diaria 😊", "Mi cielo azul ☁️", "Mi dulce melodía 🎼",
+        "Mi tesoro valioso 💎", "Eres mi milagro ✨", "Mi razón de ser 💖", "Mi luz en la sombra 🕯️",
+        "Mi instante favorito ⏳", "Mi regalo del cielo 🎁", "Eres mi vida 💗", "Mi pensamiento constante 💭",
+        "Mi bonita casualidad 🍀", "Mi faro en el mar 🌊", "Tu voz es música 🎧", "Mi pedacito de cielo 🌌",
+        "Eres mi calma 🌊", "Mi amor eterno Infinity ♾️", "Mi galaxia entera 🌌", "Mi sueño preferido 🌙",
+        "Mi rincón de luz 💡", "Tu mirada me encanta 👀", "Eres perfección ✨", "Mi estrella guiadora 🧭",
+        "Mi dulce refugio 🧸", "Mi latido de amor 💓", "Eres un encanto 🥰", "Mi fantasía hecha realidad 💫",
+        "Mi flor de primavera 🌺", "Mi jardín bonito 🌻", "Mi abrazo favorito 🫂", "Eres mi todo 💖",
+        "Mi bonita luz ✨", "Mi melodía de paz 🕊️", "Mi momento perfecto ⌛", "Mi felicidad total 🎉",
+        "Tu ternura me atrapa 💖", "Mi ángel guardián 👼", "Mi universo entero 🪐", "Mi mayor tesoro 🏅",
+        "Eres mi lugar favorito 🗺️", "Mi sol de cada mañana 🌅", "Mi suspiro constante 💨", "Mi brillo eterno 💖",
+        "Mi dulce Wendy 👑", "Mi camino de luz 🛣️", "Mi regalo de vida 🎀", "Tu alma es brillante ✨",
+        "Mi amor infinito ♾️", "Mi constelación de amor 🌌", "Eres mi destino 🎯", "Mi poema sin fin 📜",
+        "Mi calor en el invierno 🔥", "Mi brisa fresca 🍃", "Mi bonita razón 🥰", "Tu risa es mi canción 🎵",
+        "Mi pedacito de estrella ⭐", "Eres inolvidable 💖", "Mi fortuna más grande 🪙", "Mi ilusión bonita 💫",
+        "Mi refugio de paz 🕊️", "Mi vida entera 💘", "Mi pensamiento dulce 🍬", "Mi persona favorita 🥇",
+        "Mi luz de esperanza 🕯️", "Eres mi universo brillante 🪐", "Mi razón de latir 💓", "Mi flor más bella 🌹",
+        "Mi todo y mucho más 💖", "Siempre tú, mi reina 👑", "Mi destello de amor ✨", "Wendy de mi corazón ❤️"
+    ];
+
+    // Función para crear una frase flotante en pantalla
+    function crearFraseFlotante(posX = null, posY = null) {
+        let frase = document.createElement('div');
+        frase.className = 'frase-flotante';
+
+        let randProfundidad = Math.random();
+        let duracion = 0;
+        let opacidadMax = 0.8;
+
+        if (randProfundidad < 0.4) {
+            frase.classList.add('capa-fondo');
+            duracion = 4.5 + Math.random() * 2;
+            opacidadMax = 0.35;
+        } else if (randProfundidad < 0.8) {
+            frase.classList.add('capa-media');
+            duracion = 3.5 + Math.random() * 1.5;
+            opacidadMax = 0.75;
+        } else {
+            frase.classList.add('capa-frente');
+            duracion = 2.5 + Math.random() * 1;
+            opacidadMax = 0.95;
+        }
+
+        frase.style.setProperty('--opacidad-max', opacidadMax);
+
+        let x = posX !== null ? posX : Math.random() * (window.innerWidth - 100) + 50;
+        let y = posY !== null ? posY : Math.random() * (window.innerHeight - 100) + 50;
+
+        frase.style.left = x + 'px';
+        frase.style.top = y + 'px';
+        frase.style.animationDuration = duracion + 's';
+
+        let fraseAleatoria = frasesRápidas[Math.floor(Math.random() * frasesRápidas.length)];
+        frase.innerText = fraseAleatoria;
+
+        document.body.appendChild(frase);
+
+        setTimeout(() => {
+            frase.remove();
+        }, duracion * 1000);
+    }
+
+    setInterval(() => {
+        crearFraseFlotante();
+    }, 450);
+
+    document.addEventListener('click', function(e) {
+        if(e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+        crearFraseFlotante(e.clientX, e.clientY);
+    });
+
+    function verificar() {
+        let clave = document.getElementById("pass").value;
+        if (clave === "victoria123") {
+            document.getElementById("login").style.display = "none";
+            document.getElementById("contenido").style.display = "block";
+            document.getElementById("tallo").classList.add("animar-tallo");
+            setTimeout(() => { document.getElementById("grupo-petalos").classList.add("animar-latido"); }, 4000);
+            document.getElementById("musica").play();
+            setTimeout(escribirTexto, 1500);
+        } else { alert("Clave incorrecta 😢"); }
+    }
+
+    function escribirTexto() {
+        let texto = "No soy perfecto, pero contigo todo se siente diferente... 💕\nTe dedico este detalle con mucho cariño ✨\nPara: Wendy 💕";
+        let i = 0; let elemento = document.getElementById("texto");
+        function escribir() {
+            if (i < texto.length) { elemento.innerHTML += texto.charAt(i); i++; setTimeout(escribir, 55); }
+            else { 
+                document.getElementById("botones-izq").style.display = "flex";
+                document.getElementById("botones-der").style.display = "flex";
+                document.getElementById("botones-abajo").style.display = "block";
+            }
+        }
+        escribir();
+    }
+
+    function redirigirAMensajeEspecial() {
+        window.location.href = "Un Mensaje Especial Para Ti.html";
+    }
+
+    function abrirModal(id) { document.getElementById(id).classList.add('abierto'); document.getElementById('overlay').style.display = 'block'; }
+    
+    function cerrarModal(id) { 
+        document.getElementById(id).classList.remove('abierto'); 
+        document.getElementById('overlay').style.display = 'none';
+        if(id === 'carta') {
+            setTimeout(() => { document.getElementById('pag1').style.display = 'block'; document.getElementById('pag2').style.display = 'none'; }, 600);
+        }
+        if(id === 'pregunta-modal') {
+            document.getElementById('titulo-pregunta').innerText = "¿Podemos arreglarlo?";
+            document.querySelector('.opciones-container').style.display = 'flex';
+            let btnNo = document.getElementById('btn-no');
+            btnNo.style.left = 'auto';
+            btnNo.style.top = 'auto';
+            btnNo.style.right = '15px';
+        }
+    }
+
+    function abrirDetalleEspecial() {
+        document.getElementById('btn-cerrar-detalle').style.display = 'none';
+        abrirModal('detalle');
+        let contenedor = document.getElementById('detalle-contenido');
+        contenedor.innerHTML = "";
+
+        let lineas = [
+            "Este pequeño detalle nace del fondo de mi alma,",
+            "un destello de todo lo que significas para mí.",
+            "No serás una simple espectadora de mi vida...",
+            "Wendy, quiero que mi amor te envuelva para siempre:"
+        ];
+
+        let iLinea = 0;
+
+        function escribirLinea() {
+            if (iLinea < lineas.length) {
+                let p = document.createElement('p');
+                p.style.margin = "8px 0";
+                p.style.opacity = "0";
+                p.style.transition = "opacity 0.5s ease";
+                contenedor.appendChild(p);
+
+                let textoActual = lineas[iLinea];
+                let iChar = 0;
+
+                setTimeout(() => { p.style.opacity = "1"; }, 50);
+
+                function escribirCaracter() {
+                    if (iChar < textoActual.length) {
+                        p.innerHTML += textoActual.charAt(iChar);
+                        iChar++;
+                        setTimeout(escribirCaracter, 40);
+                    } else {
+                        iLinea++;
+                        setTimeout(escribirLinea, 500);
+                    }
+                }
+                escribirCaracter();
+            } else {
+                setTimeout(() => {
+                    let btnPoema = document.createElement('button');
+                    btnPoema.innerText = "Ver poema 📜";
+                    btnPoema.className = "btn-accion btn-detalle";
+                    btnPoema.style.marginTop = "15px";
+                    btnPoema.style.opacity = "0";
+                    btnPoema.style.transition = "opacity 0.8s ease, transform 0.8s ease";
+                    btnPoema.style.transform = "scale(0.8)";
+                    
+                    btnPoema.onclick = mostrarPoemaImagen;
+
+                    contenedor.appendChild(btnPoema);
+
+                    setTimeout(() => {
+                        btnPoema.style.opacity = "1";
+                        btnPoema.style.transform = "scale(1)";
+                    }, 100);
+                }, 400);
+            }
+        }
+        escribirLinea();
+    }
+
+    function mostrarPoemaImagen() {
+        let contenedor = document.getElementById('detalle-contenido');
+        contenedor.style.transition = "opacity 0.4s ease";
+        contenedor.style.opacity = "0";
+
+        setTimeout(() => {
+            contenedor.innerHTML = `<img src="poema.png" alt="Poema para Wendy" class="img-poema">`;
+            contenedor.style.opacity = "1";
+            document.getElementById('btn-cerrar-detalle').style.display = 'block';
+        }, 400);
+    }
+
+    function siguientePagina() { document.getElementById('pag1').style.display = 'none'; document.getElementById('pag2').style.display = 'block'; }
+
+    function moverBoton() {
+        let btnNo = document.getElementById('btn-no');
+        let randomX = Math.floor(Math.random() * 180) - 90;
+        let randomY = Math.floor(Math.random() * 100) - 50;
+
+        btnNo.style.position = 'absolute';
+        btnNo.style.left = `calc(50% + ${randomX}px)`;
+        btnNo.style.top = `calc(50% + ${randomY}px)`;
+    }
+
+    function lanzarConfetiCorazones() {
+        if (typeof confetti === 'function') {
+            const scalar = 2;
+            const unicorn = confetti.shapeFromText({ text: '💖', scalar });
+
+            confetti({
+                shapes: [unicorn],
+                scalar,
+                particleCount: 30,
+                spread: 60,
+                origin: { y: 0.6 }
+            });
+        }
+    }
+
+    function responderSi() {
+        lanzarConfetiCorazones();
+
+        if (typeof gtag === 'function') {
+            gtag('event', 'respuesta_si', {
+                'event_category': 'interaccion',
+                'event_label': 'Wendy acepto arreglarlo'
+            });
+        }
+
+        document.getElementById('titulo-pregunta').innerText = "Gracias por aceptar por favor veámonos mañana, necesito verte, escríbeme a qué hora quieres que nos veamos 🥺";
+        document.querySelector('.opciones-container').style.display = 'none';
+    }
+
+    function abrirVideo() { document.getElementById("musica").pause(); abrirModal('video-modal'); document.getElementById("player").play(); }
+    function cerrarVideo() {
+        let v = document.getElementById("player");
+        v.pause(); v.currentTime = 0;
+        cerrarModal('video-modal');
+        document.getElementById("musica").play();
+    }
+</script>
+</body>
+</html>
