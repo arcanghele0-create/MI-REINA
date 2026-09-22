@@ -14,10 +14,13 @@
         gtag('config', 'G-7WS4LH8YCY');
     </script>
 
+    <!-- Librería para el efecto de confeti de corazones -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <style>
         :root {
             --rosa-brillante: #ff0054;
-            --rosa-profundo: #59022;
+            --rosa-profundo: #590222;
             --verde-tallo: #1b4332;
             --girasol-petalo: #ffc300;
             --girasol-centro: #3d2b1f;
@@ -35,6 +38,36 @@
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Estilo para las frases flotantes al hacer clic */
+        .frase-flotante {
+            position: fixed;
+            color: #ffc300;
+            font-family: 'Georgia', serif;
+            font-size: 1.1rem;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 9999;
+            text-shadow: 0 0 8px rgba(255, 195, 0, 0.8), 0 0 15px rgba(255, 0, 84, 0.6);
+            animation: flotarYDesaparecer 1.5s ease-out forwards;
+            white-space: nowrap;
+        }
+
+        @keyframes flotarYDesaparecer {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.8) translateY(0);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1) translateY(-25px);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1) translateY(-50px);
+            }
         }
 
         #login {
@@ -78,20 +111,54 @@
         .btn-entrar { background: linear-gradient(45deg, #ff9500, #ffc300); color: #000; border: none; padding: 12px 35px; border-radius: 25px; cursor: pointer; font-weight: bold; }
         .btn-accion { background: var(--rosa-brillante); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; margin: 10px; transition: 0.3s; }
         
+        .btn-detalle { background: linear-gradient(45deg, #ffc300, #ff9500); color: #000; box-shadow: 0 0 15px rgba(255, 195, 0, 0.5); }
         .btn-video { background: linear-gradient(45deg, #ff0054, #ff758f); box-shadow: 0 0 15px rgba(255, 0, 84, 0.5); }
         .btn-perdon { background: linear-gradient(45deg, #7209b7, #3a0ca3); box-shadow: 0 0 15px rgba(114, 9, 183, 0.5); }
         .btn-pregunta { background: linear-gradient(45deg, #00b4d8, #0077b6); box-shadow: 0 0 15px rgba(0, 180, 216, 0.5); }
 
         .modal {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            width: 85%; max-width: 400px; background: var(--color-carta); color: #3d2b1f; padding: 35px;
+            width: 85%; max-width: 420px; background: var(--color-carta); color: #3d2b1f; padding: 30px;
             border-radius: 15px; box-shadow: 0 0 50px rgba(0,0,0,0.9); z-index: 200; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        
+        #detalle {
+            background: #000;
+            border: 2px solid var(--girasol-petalo);
+            color: #ffc300;
+            box-shadow: 0 0 35px rgba(255, 195, 0, 0.4);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
         .abierto { transform: translate(-50%, -50%) scale(1) !important; display: block !important; }
         #video-modal { background: #000; padding: 10px; max-width: 500px; }
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 150; }
 
-        /* Contenedor adaptado para celulares con posición relativa */
+        .img-poema {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 195, 0, 0.5);
+            box-shadow: 0 0 25px rgba(255, 195, 0, 0.6);
+            animation: efectoMagico 1.2s ease-out forwards;
+        }
+
+        @keyframes efectoMagico {
+            0% {
+                opacity: 0;
+                transform: scale(0.7) rotate(-3deg);
+                filter: brightness(2) blur(10px);
+            }
+            50% {
+                filter: brightness(1.5) blur(2px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+                filter: brightness(1) blur(0px);
+            }
+        }
+
         .opciones-container {
             display: flex;
             justify-content: space-around;
@@ -178,9 +245,13 @@
         </div>
         <p id="texto"></p>
         
+        <!-- Menú de Botones Principales -->
         <div id="botones-finales" style="display:none;">
             <button class="btn-accion btn-video" onclick="abrirVideo()">Ver video 🎬</button>
             <button class="btn-accion" onclick="abrirModal('carta')">Leer mi carta ✉️</button>
+            <button class="btn-accion btn-detalle" onclick="abrirDetalleEspecial()">Abrir detalle ✨</button>
+            <!-- Botón que redirige al otro archivo HTML -->
+            <button class="btn-accion btn-detalle" onclick="redirigirAMensajeEspecial()">Abre este detalle más ✨</button>
             <button class="btn-accion btn-perdon" onclick="abrirModal('perdon')">Por favor ábrelo 🥺</button>
             <button class="btn-accion btn-pregunta" onclick="abrirModal('pregunta-modal')">Una pregunta 💬</button>
         </div>
@@ -201,6 +272,15 @@
             <p style="text-align: right; font-weight: bold;">Con todo mi cariño, <br> Yo ✨</p>
             <button class="btn-accion" onclick="cerrarModal('carta')">Cerrar Carta</button>
         </div>
+    </div>
+
+    <!-- Modal de "Abrir detalle" -->
+    <div id="detalle" class="modal">
+        <h3 style="text-align: center; color: #ffc300; font-family: 'Georgia', serif; border-bottom: 1px solid rgba(255,195,0,0.3); padding-bottom: 10px;">Un detalle especial... ✨</h3>
+        <div id="detalle-contenido" style="font-family: 'Georgia', serif; line-height: 1.8; text-align: center; font-size: 1.1rem; min-height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        </div>
+        <!-- Botón con ID y oculto por defecto -->
+        <button id="btn-cerrar-detalle" class="btn-accion" style="background: #ffc300; color: #000; width: 100%; margin-top: 20px; font-weight: bold; display: none;" onclick="cerrarModal('detalle')">Cerrar</button>
     </div>
 
     <!-- Modal de la Carta de Perdón -->
@@ -237,6 +317,56 @@
     </div>
 
 <script>
+    // 100 Frases variadas relacionadas con universo, estrella, inspiración, brillo, canción, vida, flor, etc.
+    const frasesRápidas = [
+        "Eres mi universo ✨", "Mi estrella fugaz 💫", "Mi inspiración 💖", "Tu brillo me ilumina 🌟",
+        "Eres mi canción favorita 🎶", "El amor de mi vida 🌹", "Mi flor más hermosa 🌸", "Un destello mágico ⭐",
+        "Mi melodía perfecta 🎵", "Eres mi sol ☀️", "Mi luna brillante 🌙", "Mi pensamiento bonito 💭",
+        "Mi refugio seguro 🏰", "Tu sonrisa es arte 🎨", "Mi razón de sonreír 😁", "Mi constelación favorita 🌌",
+        "Eres luz pura ✨", "Mi paz en el caos 🕊️", "Mi poema favorito 📜", "Mi persona especial 💕",
+        "Te amo, Wendy ❤️", "Mi reina adorada 👑", "Un sueño hecho realidad 💭", "Mi destino bonito 🗺️",
+        "Mi latido constante 💓", "Eres magia pura ✨", "Mi mundo entero 🌍", "Mi lugar feliz 🏡",
+        "Eres mi poesía 📖", "Mi alegría diaria 😊", "Mi cielo azul ☁️", "Mi dulce melodía 🎼",
+        "Mi tesoro valioso 💎", "Eres mi milagro ✨", "Mi razón de ser 💖", "Mi luz en la sombra 🕯️",
+        "Mi instante favorito ⏳", "Mi regalo del cielo 🎁", "Eres mi vida 💗", "Mi pensamiento constante 💭",
+        "Mi bonita casualidad 🍀", "Mi faro en el mar 🌊", "Tu voz es música 🎧", "Mi pedacito de cielo 🌌",
+        "Eres mi calma 🌊", "Mi amor eterno Infinity ♾️", "Mi galaxia entera 🌌", "Mi sueño preferido 🌙",
+        "Mi rincón de luz 💡", "Tu mirada me encanta 👀", "Eres perfección ✨", "Mi estrella guiadora 🧭",
+        "Mi dulce refugio 🧸", "Mi latido de amor 💓", "Eres un encanto 🥰", "Mi fantasía hecha realidad 💫",
+        "Mi flor de primavera 🌺", "Mi jardín bonito 🌻", "Mi abrazo favorito 🫂", "Eres mi todo 💖",
+        "Mi bonita luz ✨", "Mi melodía de paz 🕊️", "Mi momento perfecto ⌛", "Mi felicidad total 🎉",
+        "Tu ternura me atrapa 💖", "Mi ángel guardián 👼", "Mi universo entero 🪐", "Mi mayor tesoro 🏅",
+        "Eres mi lugar favorito 🗺️", "Mi sol de cada mañana 🌅", "Mi suspiro constante 💨", "Mi brillo eterno 💖",
+        "Mi dulce Wendy 👑", "Mi camino de luz 🛣️", "Mi regalo de vida 🎀", "Tu alma es brillante ✨",
+        "Mi amor infinito ♾️", "Mi constelación de amor 🌌", "Eres mi destino 🎯", "Mi poema sin fin 📜",
+        "Mi calor en el invierno 🔥", "Mi brisa fresca 🍃", "Mi bonita razón 🥰", "Tu risa es mi canción 🎵",
+        "Mi pedacito de estrella ⭐", "Eres inolvidable 💖", "Mi fortuna más grande 🪙", "Mi ilusión bonita 💫",
+        "Mi refugio de paz 🕊️", "Mi vida entera 💘", "Mi pensamiento dulce 🍬", "Mi persona favorita 🥇",
+        "Mi luz de esperanza 🕯️", "Eres mi universo brillante 🪐", "Mi razón de latir 💓", "Mi flor más bella 🌹",
+        "Mi todo y mucho más 💖", "Siempre tú, mi reina 👑", "Mi destello de amor ✨", "Wendy de mi corazón ❤️"
+    ];
+
+    document.addEventListener('click', function(e) {
+        if(e.target.tagName === 'INPUT') return;
+
+        let x = e.clientX;
+        let y = e.clientY;
+
+        let frase = document.createElement('div');
+        frase.className = 'frase-flotante';
+        frase.style.left = x + 'px';
+        frase.style.top = y + 'px';
+
+        let fraseAleatoria = frasesRápidas[Math.floor(Math.random() * frasesRápidas.length)];
+        frase.innerText = fraseAleatoria;
+
+        document.body.appendChild(frase);
+
+        setTimeout(() => {
+            frase.remove();
+        }, 1500);
+    });
+
     function verificar() {
         let clave = document.getElementById("pass").value;
         if (clave === "victoria123") {
@@ -259,6 +389,11 @@
         escribir();
     }
 
+    // Función para abrir la otra página HTML
+    function redirigirAMensajeEspecial() {
+        window.location.href = "Un Mensaje Especial Para Ti.html";
+    }
+
     function abrirModal(id) { document.getElementById(id).classList.add('abierto'); document.getElementById('overlay').style.display = 'block'; }
     
     function cerrarModal(id) { 
@@ -268,7 +403,6 @@
             setTimeout(() => { document.getElementById('pag1').style.display = 'block'; document.getElementById('pag2').style.display = 'none'; }, 600);
         }
         if(id === 'pregunta-modal') {
-            // Reiniciar la pregunta y devolver el botón "No" a su sitio inicial a la derecha
             document.getElementById('titulo-pregunta').innerText = "¿Podemos arreglarlo?";
             document.querySelector('.opciones-container').style.display = 'flex';
             let btnNo = document.getElementById('btn-no');
@@ -278,23 +412,122 @@
         }
     }
 
+    function abrirDetalleEspecial() {
+        // Aseguramos que el botón cerrar esté oculto al iniciar
+        document.getElementById('btn-cerrar-detalle').style.display = 'none';
+
+        abrirModal('detalle');
+        let contenedor = document.getElementById('detalle-contenido');
+        contenedor.innerHTML = "";
+
+        let lineas = [
+            "Este pequeño detalle nace del fondo de mi alma,",
+            "un destello de todo lo que significas para mí.",
+            "No serás una simple espectadora de mi vida...",
+            "Wendy, quiero que mi amor te envuelva para siempre:"
+        ];
+
+        let iLinea = 0;
+
+        function escribirLinea() {
+            if (iLinea < lineas.length) {
+                let p = document.createElement('p');
+                p.style.margin = "8px 0";
+                p.style.opacity = "0";
+                p.style.transition = "opacity 0.5s ease";
+                contenedor.appendChild(p);
+
+                let textoActual = lineas[iLinea];
+                let iChar = 0;
+
+                setTimeout(() => { p.style.opacity = "1"; }, 50);
+
+                function escribirCaracter() {
+                    if (iChar < textoActual.length) {
+                        p.innerHTML += textoActual.charAt(iChar);
+                        iChar++;
+                        setTimeout(escribirCaracter, 40);
+                    } else {
+                        iLinea++;
+                        setTimeout(escribirLinea, 500);
+                    }
+                }
+                escribirCaracter();
+            } else {
+                setTimeout(() => {
+                    let btnPoema = document.createElement('button');
+                    btnPoema.innerText = "Ver poema 📜";
+                    btnPoema.className = "btn-accion btn-detalle";
+                    btnPoema.style.marginTop = "15px";
+                    btnPoema.style.opacity = "0";
+                    btnPoema.style.transition = "opacity 0.8s ease, transform 0.8s ease";
+                    btnPoema.style.transform = "scale(0.8)";
+                    
+                    btnPoema.onclick = mostrarPoemaImagen;
+
+                    contenedor.appendChild(btnPoema);
+
+                    setTimeout(() => {
+                        btnPoema.style.opacity = "1";
+                        btnPoema.style.transform = "scale(1)";
+                    }, 100);
+                }, 400);
+            }
+        }
+        escribirLinea();
+    }
+
+    function mostrarPoemaImagen() {
+        let contenedor = document.getElementById('detalle-contenido');
+        contenedor.style.transition = "opacity 0.4s ease";
+        contenedor.style.opacity = "0";
+
+        setTimeout(() => {
+            contenedor.innerHTML = `<img src="poema.png" alt="Poema para Wendy" class="img-poema">`;
+            contenedor.style.opacity = "1";
+
+            // Se muestra el botón 'Cerrar' únicamente al terminar de cargar la imagen del poema
+            document.getElementById('btn-cerrar-detalle').style.display = 'block';
+        }, 400);
+    }
+
     function siguientePagina() { document.getElementById('pag1').style.display = 'none'; document.getElementById('pag2').style.display = 'block'; }
 
-    // Lógica optimizada para celulares: el botón "No" salta a posiciones aleatorias seguras
     function moverBoton() {
         let btnNo = document.getElementById('btn-no');
-        
-        // Coordenadas aleatorias dentro del área segura de la tarjeta del modal
-        let randomX = Math.floor(Math.random() * 180) - 90; // Rango horizontal
-        let randomY = Math.floor(Math.random() * 100) - 50; // Rango vertical
+        let randomX = Math.floor(Math.random() * 180) - 90;
+        let randomY = Math.floor(Math.random() * 100) - 50;
 
         btnNo.style.position = 'absolute';
         btnNo.style.left = `calc(50% + ${randomX}px)`;
         btnNo.style.top = `calc(50% + ${randomY}px)`;
     }
 
-    // Acción cuando presiona "Sí"
+    function lanzarConfetiCorazones() {
+        if (typeof confetti === 'function') {
+            const scalar = 2;
+            const unicorn = confetti.shapeFromText({ text: '💖', scalar });
+
+            confetti({
+                shapes: [unicorn],
+                scalar,
+                particleCount: 30,
+                spread: 60,
+                origin: { y: 0.6 }
+            });
+        }
+    }
+
     function responderSi() {
+        lanzarConfetiCorazones();
+
+        if (typeof gtag === 'function') {
+            gtag('event', 'respuesta_si', {
+                'event_category': 'interaccion',
+                'event_label': 'Wendy acepto arreglarlo'
+            });
+        }
+
         document.getElementById('titulo-pregunta').innerText = "Gracias por aceptar por favor veámonos mañana, necesito verte, escríbeme a qué hora quieres que nos veamos 🥺";
         document.querySelector('.opciones-container').style.display = 'none';
     }
